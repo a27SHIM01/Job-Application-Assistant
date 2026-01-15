@@ -1,19 +1,19 @@
 <script setup>
-  import { GoogleGenAI } from '@google/genai';
-  import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 
-  const ai = new GoogleGenAI({})
+const responseText = ref('');
 
-  async function main() {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: "Explain how AI works in a few words",
-    });
-    console.log(response.text);
-  }
+async function main() {
+  const res = await fetch('http://localhost:3000/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Explain how AI works in a few words' }),
+  });
+  const data = await res.json();
+  responseText.value = data.text || JSON.stringify(data);
+}
 
-  onMounted(main)
-
+onMounted(main);
 </script>
 
 <template>
