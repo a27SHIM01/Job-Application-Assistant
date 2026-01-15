@@ -1,4 +1,4 @@
-# .
+# Job Application Assistant
 
 AI-powered assistant to help when applying for jobs.
 
