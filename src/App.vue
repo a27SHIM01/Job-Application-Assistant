@@ -1,6 +1,6 @@
 <script setup>
   import { GoogleGenAI } from '@google/genai';
-import { onMounted } from 'vue';
+  import { onMounted } from 'vue';
 
   const ai = new GoogleGenAI({})
 

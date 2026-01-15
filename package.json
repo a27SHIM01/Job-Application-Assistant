@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@google/genai": "^1.36.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "vue": "^3.5.26"
   },
   "devDependencies": {
@@ -24,5 +27,18 @@
     "globals": "^17.0.0",
     "vite": "^7.3.0",
     "vite-plugin-vue-devtools": "^8.0.5"
-  }
+  },
+  "description": "AI-powered assistant to help when applying for jobs.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a27SHIM01/Job-Application-Assistant.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/a27SHIM01/Job-Application-Assistant/issues"
+  },
+  "homepage": "https://github.com/a27SHIM01/Job-Application-Assistant#readme"
 }
