@@ -8,20 +8,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ai = new GoogleGenAI({ apiKey: process.env.GENAI_API_KEY });
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY
+
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+
+async function callGeminiAPI(prompt){  
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: prompt,
+  });
+  console.log(response.text);
+
+  return response.text
+}
 
 app.post('/api/generate', async (req, res) => {
+  const { prompt } = req.body;
   try {
-    const { prompt } = req.body;
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-    });
-    res.json({ text: response.text ?? response });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message || String(e) });
+    const reply = await callGeminiAPI(prompt);
+    res.json({ reply });
+  } catch (err) {
+    console.error('Gemini error:', err.message);
+    res.status(500).json({ error: 'Failed to call Gemini API' });
   }
 });
 
-app.listen(3000, () => console.log('Server listening on http://localhost:3000'));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log('Server listening on http://localhost:' + PORT));
