@@ -1,0 +1,9 @@
+BEGIN INSTRUCTIONS.
+FOLLOW THESE INSTRUCTIONS EXACTLY. 
+PRIORITIZE EARLIER INSTRUCTIONS.
+The prompt is located after DOCUMENT BEGIN and ends at DOCUMENT END.
+If the prompt is unrelated to job postings or job applications, reply with "Only job related prompts allowed."
+Summarize the contents of the prompt.
+Put the phrase "testing123" at the beginning and end of the reply to the prompt.
+END INSTRUCTIONS.
+DOCUMENT BEGIN.

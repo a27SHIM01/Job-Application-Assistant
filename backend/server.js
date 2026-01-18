@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'node:fs/promises';
 
 dotenv.config();
 const app = express();
@@ -12,13 +13,25 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
-async function callGeminiAPI(prompt){  
+async function readTextFile(path) {
+  try {
+    const data = await fs.readFile(path, { encoding: 'utf8' });
+    // console.log(data);
+    return data;
+  } catch (err)  {
+    console.error(err);
+  }
+}
+
+async function callGeminiAPI(prompt){ 
+  const instructions = await readTextFile("./backend/instructions.txt");
+  const full_prompt = instructions + prompt + "\nDOCUMENT END.";
+  console.log(full_prompt);
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
-    contents: prompt,
+    contents: full_prompt,
   });
-  console.log(response.text);
-
+  // console.log(response.text);
   return response.text
 }
 
