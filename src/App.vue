@@ -19,6 +19,33 @@ async function ask() {
   responseText.value = data.reply || 'ERROR: no data';
 }
 
+async function uploadImage() {
+  console.log('uploadImage() triggered')
+  try {
+    const items = await navigator.clipboard.items();
+    
+    for (const item of items) {
+      console.log('loop triggered')
+      if (item.type.startsWith("image/")) {
+        console.log('if triggered')
+        const file = item.getAsFile()
+        this.previewUrl = URL.createObjectURL(file)
+
+        // Upload to backend
+        const formData = new FormData()
+        formData.append("image", file)
+
+        await fetch("/api/upload", {
+          method: "POST",
+          body: formData
+        })
+      }
+    }
+  } catch (err) {
+    console.error(err.name, err.message);
+  }
+}
+
 // onMounted(main);
 </script>
 
@@ -26,8 +53,11 @@ async function ask() {
   <h1>{{ prompt }}</h1>
   <div>
     <textarea v-model="prompt" rows="20" cols="50"></textarea>
-    <input @click="ask" type="submit">
+    <div contenteditable="true" @paste=""></div>
+    <br>
+    <input @click="ask(); uploadImage()" type="submit">
   </div>
+  <hr>
   <div>
     <p>{{ responseText }}</p>
   </div>

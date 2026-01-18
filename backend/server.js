@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs/promises';
+import multer from 'multer';
+import path from 'path';
 
 dotenv.config();
 const app = express();
@@ -34,6 +36,23 @@ async function callGeminiAPI(prompt){
   // console.log(response.text);
   return response.text
 }
+
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname))
+  }
+})
+
+const upload = multer({ storage })
+
+app.post("/api/upload", upload.single("image"), (req, res) => {
+  res.json({
+    success: true,
+    file: req.file.filename
+  })
+  console.log(req.file.filename);
+})
 
 app.post('/api/generate', async (req, res) => {
   const { prompt } = req.body;
