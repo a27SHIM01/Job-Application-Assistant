@@ -55,7 +55,7 @@ async function uploadImage() {
     <textarea v-model="prompt" rows="20" cols="50"></textarea>
     <div contenteditable="true" @paste=""></div>
     <br>
-    <input @click="ask(); uploadImage()" type="submit">
+    <input @click="ask" type="submit">
   </div>
   <hr>
   <div>

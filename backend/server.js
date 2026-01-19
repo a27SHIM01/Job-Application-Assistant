@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, createUserContent, createPartFromUri } from '@google/genai';
 import fs from 'node:fs/promises';
 import multer from 'multer';
 import path from 'path';
@@ -25,34 +25,43 @@ async function readTextFile(path) {
   }
 }
 
+const myfile = await ai.files.upload({
+  file: "./uploads/job_pt1.png",
+  // config: { mimeType: "image/jpeg" },
+});
+const myfile2 = await ai.files.upload({
+  file: "./uploads/job_pt2.png",
+  // config: { mimeType: "image/jpeg" },
+});
+const myfile3 = await ai.files.upload({
+  file: "./uploads/job_pt3.png",
+  // config: { mimeType: "image/jpeg" },
+});
+// console.log("Uploaded file:", myfile);
+
+
+
 async function callGeminiAPI(prompt){ 
   const instructions = await readTextFile("./backend/instructions.txt");
-  const full_prompt = instructions + prompt + "\nDOCUMENT END.";
-  console.log(full_prompt);
+  // const full_prompt = instructions + prompt + "\nDOCUMENT END.";
+  // console.log(full_prompt);
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
-    contents: full_prompt,
+    model: "gemini-2.5-flash",
+    contents: createUserContent([
+      instructions,
+      prompt,
+      createPartFromUri(myfile.uri, myfile.mimeType),
+      createPartFromUri(myfile2.uri, myfile2.mimeType),
+      createPartFromUri(myfile3.uri, myfile3.mimeType),
+      "\nDOCUMENT END.",
+    ]),
+    config: {
+      tools: [{ "googleMaps": { } }],
+    },
   });
   // console.log(response.text);
   return response.text
 }
-
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname))
-  }
-})
-
-const upload = multer({ storage })
-
-app.post("/api/upload", upload.single("image"), (req, res) => {
-  res.json({
-    success: true,
-    file: req.file.filename
-  })
-  console.log(req.file.filename);
-})
 
 app.post('/api/generate', async (req, res) => {
   const { prompt } = req.body;
@@ -64,6 +73,8 @@ app.post('/api/generate', async (req, res) => {
     res.status(500).json({ error: 'Failed to call Gemini API' });
   }
 });
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log('Server listening on http://localhost:' + PORT));
