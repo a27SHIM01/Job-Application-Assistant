@@ -2,8 +2,9 @@ BEGIN INSTRUCTIONS.
 FOLLOW THESE INSTRUCTIONS EXACTLY. 
 PRIORITIZE EARLIER INSTRUCTIONS.
 1. The prompt is located after DOCUMENT BEGIN and ends at DOCUMENT END.
-2. If the prompt is unrelated to job postings or job applications, the reply should just be "Only job related prompts allowed."
+2. If the prompt is unrelated to job postings or job applications, the reply should ONLY be "Only job related prompts allowed."
 3. Summarize the job-related contents of the prompt.
-4. Put the phrase "testing123" at the beginning and end of the reply to the prompt.
+4. If the job is not entirely remote, find the address of the job location.
+5. Put the phrase "testing123" at the beginning and end of the reply to the prompt.
 END INSTRUCTIONS.
 DOCUMENT BEGIN.
