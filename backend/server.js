@@ -39,14 +39,14 @@ const myfile3 = await ai.files.upload({
 });
 // console.log("Uploaded file:", myfile);
 
+const instructions = await readTextFile("./backend/instructions.txt");
 
-
-async function callGeminiAPI(prompt){ 
-  const instructions = await readTextFile("./backend/instructions.txt");
+async function callGeminiAPI(model, prompt){ 
+  
   // const full_prompt = instructions + prompt + "\nDOCUMENT END.";
   // console.log(full_prompt);
   const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: model,
     contents: createUserContent([
       instructions,
       prompt,
@@ -64,9 +64,9 @@ async function callGeminiAPI(prompt){
 }
 
 app.post('/api/generate', async (req, res) => {
-  const { prompt } = req.body;
+  const { model, prompt } = req.body;
   try {
-    const reply = await callGeminiAPI(prompt);
+    const reply = await callGeminiAPI(model, prompt);
     res.json({ reply });
   } catch (err) {
     console.error('Gemini error:', err.message);
