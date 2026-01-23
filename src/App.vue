@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import Map from './components/Map.vue'
 
-const responseText = ref('');
+const response_json = ref();
+const error_msg = ref('');
 const prompt = ref('');
 const img_board_visible = ref(false);
 const model = ref('gemini-2.5-flash');
@@ -22,11 +22,52 @@ async function ask() {
     }),
   });
   const data = await res.json();
-  responseText.value = data.reply || data.error || 'ERROR: no data';
+  console.log('Before', typeof(data));
+  console.log(data);
+  if (typeof data !== 'object') {
+    data = JSON.parse(data);
+  }
+  console.log('After', typeof(data));
+  console.log(data);
+  response_json.value = data;
+  if ('summary' in data) {
+    console.log('summary is in data');
+    response_json.value = data;
+  }
+  else {
+    error_msg.value = data.error || 'No data.';
+  }
 }
+
+
 
 function toggleImageInput() {
   img_board_visible.value = !img_board_visible.value;
+}
+
+async function uploadClipboardImage(file) {
+  const fd = new FormData();
+  fd.append('file', file, file.name || 'clipboard.png');
+  const res = await fetch('/api/upload-image', { method: 'POST', body: fd });
+  return res.json();
+}
+
+function onPaste(e) {
+  const items = e.clipboardData?.items || [];
+  console.log('onPaste');
+  for (const item of items) {
+    if (item.type && item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) {
+        console.log('onPaste if file');
+        uploadClipboardImage(file)
+          .then(r => console.log('uploaded', r))
+          .catch(err => console.error(err));
+      }
+      // e.preventDefault();
+      break;
+    }
+  }
 }
 
 
@@ -50,7 +91,7 @@ onMounted(main);
   
     <div class="center" v-if="img_board_visible">
       <h2>You can also put images of the job here:</h2>
-      <div class="center image_board" contenteditable="true" @paste=""></div>
+      <div class="center image_board" contenteditable="true" @paste="onPaste"></div>
     </div>
 
     <div class="center">
@@ -66,13 +107,14 @@ onMounted(main);
     <input @click="ask" type="submit" value="Ask Gemini">
   </div>
 
-  <!-- map container -->
-  <!-- <div><Map></Map></div> -->
   
   <hr>
   <div id="response">
-    <p>Gemini Response:</p>
-    <p>{{ responseText }}</p>
+    <p>Response: {{ response_json }}</p>
+    <p>Error: {{ error_msg }}</p>
+    <h3>Gemini Response:</h3>
+    <p v-if="error_msg == ''">{{ response_json }}</p>
+    <p v-else>Error: {{ error_msg }}</p>
   </div>
   
 
