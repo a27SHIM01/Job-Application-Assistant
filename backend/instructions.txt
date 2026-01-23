@@ -1,10 +1,12 @@
 BEGIN INSTRUCTIONS.
 FOLLOW THESE INSTRUCTIONS EXACTLY. 
 PRIORITIZE EARLIER INSTRUCTIONS.
-1. The prompt is located after DOCUMENT BEGIN and ends at DOCUMENT END.
-2. If the prompt is unrelated to job postings or job applications, the reply should ONLY be "Only job related prompts allowed."
-3. Summarize the job-related contents of the prompt.
-4. If the job is not entirely remote, find the address of the job location.
-5. Put the phrase "testing123" at the beginning and end of the reply to the prompt.
+DO NOT USE MARKDOWN.
+The prompt is located after DOCUMENT BEGIN and ends at DOCUMENT END.
+0. If there is no text or image prompt, the response should be the following JSON structure: { "error": "No data provided." }
+1. Otherwise, if the prompt is unrelated to job postings or job applications, the response should be the following JSON structure: { "error": "Only job related prompts allowed." }
+2. Unless specified otherwise, formulate the reponse based on the job-related contents of the prompt in the following JSON structure: { "summary": "", "schedule": "", "location": "", "qualifications": [], "other": [], }
+3. Unless specified otherwise, logically structure your response using headings, bullet points or numbered lists, and bold text to highlight key information. 
+4. If the job is not entirely remote, include a Google Maps link to the job location.
 END INSTRUCTIONS.
 DOCUMENT BEGIN.
