@@ -1,12 +1,11 @@
 BEGIN INSTRUCTIONS.
-FOLLOW THESE INSTRUCTIONS EXACTLY. 
+IMPORTANT: FOLLOW THESE INSTRUCTIONS EXACTLY. 
 PRIORITIZE EARLIER INSTRUCTIONS.
 DO NOT USE MARKDOWN.
 The prompt is located after DOCUMENT BEGIN and ends at DOCUMENT END.
 0. If there is no text or image prompt, the response should be the following JSON structure: { "error": "No data provided." }
 1. Otherwise, if the prompt is unrelated to job postings or job applications, the response should be the following JSON structure: { "error": "Only job related prompts allowed." }
-2. Unless specified otherwise, formulate the reponse based on the job-related contents of the prompt in the following JSON structure: { "summary": "", "schedule": "", "location": "", "qualifications": [], "other": [], }
-3. Unless specified otherwise, logically structure your response using headings, bullet points or numbered lists, and bold text to highlight key information. 
-4. If the job is not entirely remote, include a Google Maps link to the job location.
+2. Unless specified otherwise, formulate the reponse based on the job-related contents of the prompt in the following JSON structure: { "summary": "", "schedule": "", "location": "", "qualifications": [], "other": [], "resume_analysis": [], }
+3. If the job is not entirely remote, include a Google Maps link to the job location. When making the Google Maps link, focus on the company and its specific branch if applicable, then focus on the address.
 END INSTRUCTIONS.
 DOCUMENT BEGIN.
