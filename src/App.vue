@@ -1,44 +1,91 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import FileUpload from './components/FileUpload.vue';
 
-const response_json = ref();
+const response_json = ref({});
+const summary = ref('');
+const schedule = ref('');
+const location = ref('');
+const qualifications = ref([]);
+const other = ref([]);
+const resume_analysis = ref([]);
 const error_msg = ref('');
+
 const prompt = ref('');
 const img_board_visible = ref(false);
 const model = ref('gemini-2.5-flash');
 
 
 function main() {
-  console.log('Begin app.')
+  console.log('Begin app.');
+  // resetResponse();
+}
+
+function resetResponse() {
+  response_json.value = {};
+  summary.value = '';
+  schedule.value = '';
+  location.value = '';
+  qualifications.value = [];
+  other.value = [];
+  resume_analysis.value = [];
+  error_msg.value = '';
 }
 
 async function ask() {
-  const res = await fetch('http://localhost:3000/api/generate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      model: model.value, 
-      prompt: prompt.value 
-    }),
-  });
-  const data = await res.json();
+  try {
+    resetResponse();
+    const res = await fetch('http://localhost:3000/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        model: model.value, 
+        prompt: prompt.value 
+      }),
+    });
+    const data = await res.json();
+    parseResponse(data);
+  } catch (error) {
+    error_msg.value = error.message;
+  }
+  
+}
+
+function parseResponse(data) {
   console.log('Before', typeof(data));
   console.log(data);
   if (typeof data !== 'object') {
-    data = JSON.parse(data);
+    try {
+      data = JSON.parse(data);
+    } catch (err) {
+      console.log(err.message);
+      data = { error: 'Incorrect response data type.' };
+    }
   }
   console.log('After', typeof(data));
   console.log(data);
-  response_json.value = data;
   if ('summary' in data) {
     console.log('summary is in data');
     response_json.value = data;
+    summary.value = data.summary || 'No summary found.';
+    schedule.value = data.schedule || 'No schedule found.';
+    location.value = data.location || 'No location found.';
+    qualifications.value = data.qualifications || ['No qualifications found.'];
+    other.value = data.other || ['No other info found.'];
+    console.log(data.resume_analysis);
+    console.log(data.resume_analysis == []);
+    if (data.resume_analysis.length < 1) {
+      resume_analysis.value = ['No resume provided.'];
+    }
+    else {
+      resume_analysis.value = data.resume_analysis;
+    }
+    // resume_analysis.value = (data.resume_analysis != []) ? data.resume_analysis : ['No resume provided.'];
   }
   else {
     error_msg.value = data.error || 'No data.';
   }
 }
-
 
 
 function toggleImageInput() {
@@ -71,6 +118,7 @@ function onPaste(e) {
 }
 
 
+
 onMounted(main);
 </script>
 
@@ -85,7 +133,9 @@ onMounted(main);
       <h3>You can also write additional job-related prompts.</h3>
       <textarea class="text_description" v-model="prompt"></textarea>
     </div>
+    <hr>
     
+    <FileUpload></FileUpload>
 
     <input class="center" @click="toggleImageInput" type="submit" value="Toggle Image Input">
   
@@ -110,11 +160,37 @@ onMounted(main);
   
   <hr>
   <div id="response">
-    <p>Response: {{ response_json }}</p>
-    <p>Error: {{ error_msg }}</p>
+    <h3>Debugging Panel</h3>
+    <div>
+      <p>Response: {{ response_json }}</p>
+      <p>Error: {{ error_msg }}</p>
+    </div>
+    
+
     <h3>Gemini Response:</h3>
-    <p v-if="error_msg == ''">{{ response_json }}</p>
-    <p v-else>Error: {{ error_msg }}</p>
+
+    <div v-if="summary != ''">
+      <h4>Summary</h4><p>{{ summary }}</p><br>
+      <h4>Schedule</h4><p>{{ schedule }}</p><br>
+      <h4>Location</h4><p>{{ location }}</p><br>
+      <h4>Qualifications</h4>
+      <ul v-for="item in qualifications">
+        <li>{{ item }}</li>
+      </ul><br>
+      <h4>Extra Info</h4>
+      <ul v-for="item in other">
+        <li>{{ item }}</li>
+      </ul><br>
+      <h4>Resume Analysis</h4>
+      <ul v-for="item in resume_analysis">
+        <li>{{ item }}</li>
+      </ul><br>
+    </div>
+    
+    <div v-if="error_msg != ''">
+      <p>Error: {{ error_msg }}</p>
+    </div>
+    
   </div>
   
 
