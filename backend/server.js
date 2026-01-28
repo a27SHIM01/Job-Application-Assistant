@@ -22,24 +22,37 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname || '.png'))
+  filename: (req, file, cb) => cb(null, file.originalname)
 });
 
 const upload = multer({ storage });
 
 app.use('/uploads', express.static(uploadDir));
 
-app.post('/api/upload-image', upload.single('file'), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: 'no file' });
-  res.json({ filename: req.file.filename, url: `/uploads/${req.file.filename}` });
-});
 
 let my_resume = null;
 app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
+  const listResponse = await ai.files.list({ config: { pageSize: 10 } });
+  for await (const file of listResponse) {
+    console.log(file.name);
+  }
+
   const savedPath = path.join(uploadDir, req.file.filename);
-  my_resume = await ai.files.upload({ file: savedPath });
+  try {
+    my_resume = await ai.files.upload({ 
+      file: savedPath, 
+      config: {
+        mimeType: req.file.mimetype,
+        // name: req.file.originalname,
+      }
+    });
+  } catch (error) {
+    console.error('POST try resume upload', error.message);
+  }
+  console.log('HERE');
+  console.log('Resume file name: ', my_resume.name);
 
 });
 
@@ -49,22 +62,22 @@ async function readTextFile(path) {
     // console.log(data);
     return data;
   } catch (err)  {
-    console.error(err);
+    console.error('readTextFile: ', err);
   }
 }
 
-const myfile = await ai.files.upload({
-  file: "./uploads/job_pt1.png",
-  // config: { mimeType: "image/jpeg" },
-});
-const myfile2 = await ai.files.upload({
-  file: "./uploads/job_pt2.png",
-  // config: { mimeType: "image/jpeg" },
-});
-const myfile3 = await ai.files.upload({
-  file: "./uploads/job_pt3.png",
-  // config: { mimeType: "image/jpeg" },
-});
+// const myfile = await ai.files.upload({
+//   file: "./uploads/job_pt1.png",
+//   // config: { mimeType: "image/jpeg" },
+// });
+// const myfile2 = await ai.files.upload({
+//   file: "./uploads/job_pt2.png",
+//   // config: { mimeType: "image/jpeg" },
+// });
+// const myfile3 = await ai.files.upload({
+//   file: "./uploads/job_pt3.png",
+//   // config: { mimeType: "image/jpeg" },
+// });
 // console.log("Uploaded file:", myfile);
 
 const instructions = await readTextFile("./backend/instructions.txt");
@@ -73,7 +86,7 @@ function createContent(prompt) {
   const parts = [
     instructions || '',
     prompt || '',
-    '\nIf a resume has been provided, analyze it and put the analysis in the "resume_analysis": [] property. Additionally, write feedback on how to tailor the resume to fit the job.',
+    '\nIf a resume has been provided, provide both analysis and feedback if possible as strings in the "resume_analysis": [] property.',
   ];
 
   if (my_resume && my_resume.uri) {
