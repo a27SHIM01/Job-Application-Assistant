@@ -35,6 +35,7 @@ function resetResponse() {
 async function ask() {
   try {
     resetResponse();
+    console.log('Before ask fetch');
     const res = await fetch('http://localhost:3000/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +59,7 @@ function parseResponse(data) {
     try {
       data = JSON.parse(data);
     } catch (err) {
-      console.log(err.message);
+      console.error('parseResponse typeof data !== object', err.message);
       data = { error: 'Incorrect response data type.' };
     }
   }
@@ -72,17 +73,19 @@ function parseResponse(data) {
     location.value = data.location || 'No location found.';
     qualifications.value = data.qualifications || ['No qualifications found.'];
     other.value = data.other || ['No other info found.'];
-    console.log(data.resume_analysis);
-    console.log(data.resume_analysis == []);
-    if (data.resume_analysis.length < 1) {
-      resume_analysis.value = ['No resume provided.'];
-    }
-    else {
-      resume_analysis.value = data.resume_analysis;
-    }
-    // resume_analysis.value = (data.resume_analysis != []) ? data.resume_analysis : ['No resume provided.'];
+    // console.log(data.resume_analysis);
+    // console.log(Array.isArray(data.resume_analysis));
+    // console.log(data.resume_analysis == []);
+    // if (data.resume_analysis.length < 1) {
+    //   resume_analysis.value = ['No resume provided.'];
+    // }
+    // else {
+    //   resume_analysis.value = data.resume_analysis;
+    // }
+    resume_analysis.value = (data.resume_analysis.length >= 1) ? data.resume_analysis : ['No resume provided.'];
   }
   else {
+    console.error('parseresponse if summary in data');
     error_msg.value = data.error || 'No data.';
   }
 }
