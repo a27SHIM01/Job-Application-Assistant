@@ -71,17 +71,8 @@ function parseResponse(data) {
     summary.value = data.summary || 'No summary found.';
     schedule.value = data.schedule || 'No schedule found.';
     location.value = data.location || 'No location found.';
-    qualifications.value = data.qualifications || ['No qualifications found.'];
-    other.value = data.other || ['No other info found.'];
-    // console.log(data.resume_analysis);
-    // console.log(Array.isArray(data.resume_analysis));
-    // console.log(data.resume_analysis == []);
-    // if (data.resume_analysis.length < 1) {
-    //   resume_analysis.value = ['No resume provided.'];
-    // }
-    // else {
-    //   resume_analysis.value = data.resume_analysis;
-    // }
+    qualifications.value = (data.qualifications.length >= 1) ? data.qualifications : ['No qualifications found.'];
+    other.value = (data.other.length >= 1) ? data.other : ['No other info found.'];
     resume_analysis.value = (data.resume_analysis.length >= 1) ? data.resume_analysis : ['No resume provided.'];
   }
   else {
@@ -157,7 +148,7 @@ onMounted(main);
     </div>
 
     <br>
-    <input @click="ask" type="submit" value="Ask Gemini">
+    <button @click="ask">Ask Gemini</button>
   </div>
 
   

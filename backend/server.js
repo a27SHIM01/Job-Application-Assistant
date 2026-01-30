@@ -34,25 +34,29 @@ let my_resume = null;
 app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded.' });
 
+  // deletes all previous uploaded files when you upload a new file
   const listResponse = await ai.files.list({ config: { pageSize: 10 } });
   for await (const file of listResponse) {
     console.log(file.name);
+    await ai.files.delete({ name: file.name });
   }
 
   const savedPath = path.join(uploadDir, req.file.filename);
+  console.log(savedPath);
   try {
     my_resume = await ai.files.upload({ 
       file: savedPath, 
       config: {
         mimeType: req.file.mimetype,
-        // name: req.file.originalname,
+        name: 'resume',
       }
     });
   } catch (error) {
     console.error('POST try resume upload', error.message);
   }
+
   console.log('HERE');
-  console.log('Resume file name: ', my_resume.name);
+  console.log('Resume filename: ', my_resume.name);
 
 });
 
@@ -82,17 +86,23 @@ async function readTextFile(path) {
 
 const instructions = await readTextFile("./backend/instructions.txt");
 
-function createContent(prompt) {
+async function createContent(prompt) {
   const parts = [
     instructions || '',
     prompt || '',
-    '\nIf a resume has been provided, provide both analysis and feedback if possible as strings in the "resume_analysis": [] property.',
+    '\nIf a resume has been provided, provide both analysis and feedback if possible as separate string items in the "resume_analysis": [] property.',
   ];
-
+  if (!my_resume) {
+    try {
+      my_resume = await ai.files.get({ name: 'resume' });
+    } catch (error) {
+      console.log('No previous resume found.', error.message);
+    }
+  }
+  
   if (my_resume && my_resume.uri) {
     parts.push(createPartFromUri(my_resume.uri, my_resume.mimeType));
   }
-  
 
   // if (myfile && myfile.uri) parts.push(createPartFromUri(myfile.uri, myfile.mimeType));
   // if (myfile2 && myfile2.uri) parts.push(createPartFromUri(myfile2.uri, myfile2.mimeType));
@@ -103,7 +113,7 @@ function createContent(prompt) {
 }
 
 async function callGeminiAPI(model, prompt) {
-  const content = createContent(prompt);
+  const content = await createContent(prompt);
   const response = await ai.models.generateContent({
     model,
     contents: content,
@@ -111,6 +121,8 @@ async function callGeminiAPI(model, prompt) {
       tools: [{ "googleMaps": { } }],
     },
   });
+  console.log('usageMetadata', response.usageMetadata)
+  console.log('meta', response.meta)
   console.log(response.text);
   return response.text
 }
